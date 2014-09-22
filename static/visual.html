@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Single Celled Doubt</title>
+    <meta charset="utf-8"/>
+                <meta content='width=device-width; height=device-height; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;' name='viewport' />
+                <meta name="viewport" content="width=device-width" />
+    <style>
+.feelings {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+
+    font-size: 4000%;
+    transform: rotate(90deg);
+    text-align:center;
+    z-index: 10;
+}
+.can {
+    position: absolute;
+    width: 100%
+    height: 100%;
+}
+    </style>
+
+  </head>
+  <body>
+<div class="feelings" id="feelings">
+:(
+</div>
+	<canvas class="can" id="canvas" width="100%" height="100%" style="-webkit-tap-highlight-color: transparent;"></canvas> 
+
+<script>
+
+var faces = {
+    "happy":[":)",":D",";)"],
+    "sad"  :[":(",":/",":C",":_("],
+    "angry":[">:(",">:|",">:C",">:O"],
+    "bored":[":|",":\\",";|",":/"],
+};
+var faceColor = {
+    "happy":"rgb(158,128,128)",
+    "sad"  :"rgb(128,128,158)",
+    "angry":"rgb(255,128,128)",
+    "bored":"rgb(128,138,128)"
+};
+
+var dots = [];
+
+
+window.onload = function() {
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width  = window.innerWidth-6;
+    var H = canvas.height = window.innerHeight-50;
+
+    function choose(arr) {
+        return arr[Math.floor(Math.random()*arr.length)];
+    };
+    function changeFace(emotion) {
+        if (!emotion) {
+            console.log("emotion");
+            
+            emotion = choose(Object.keys(faces));
+            console.log(Object.keys(faces));
+        }
+        console.log("face");        
+        var ourFace = choose(faces[emotion]);
+        var obj = document.getElementById("feelings");
+        obj.style.color = faceColor[emotion];
+        obj.innerHTML = ourFace;
+    };
+
+    function drawDot(obj) {
+        console.log(obj);
+        ctx.beginPath();
+        ctx.arc(obj["x"] % W, obj["y"] % H, obj["radius"]||10, obj["sa"]||0, obj["ea"]||Math.PI*2, obj["ac"]);
+        ctx.fill();       
+
+    }
+    function fade(n) {
+        if (n === undefined) {
+            n = 0.5;
+        }
+        ctx.save();
+        ctx.globalCompositeOperation = "none";
+        ctx.globalAlpha = 10.0 / 100;
+
+        ctx.fillStyle = "#ffffff"
+
+        ctx.fillRect(0, 0, W,H);
+        ctx.restore();        
+    }
+    function randomDot() {
+        return {
+            "x": Math.random()*W,
+            "y": Math.random()*H,
+            "radius": Math.random()*50,
+        };
+    }
+    function randomWalker() {
+        var walker = randomDot();
+        var width = 0.1;
+        walker.walk = function() {
+            var dx = Math.random()*width*W - 0.5*width*W;
+            var dy = Math.random()*width*W - 0.5*width*W;
+            walker["x"] += dx;
+            walker["y"] += dy;
+        }
+        walker.dot = function() {
+            return {
+                "x": walker["x"],
+                "y": walker["y"],
+                "radius": 30
+            };            
+        }
+        return walker;
+    }
+    var walkers = [];
+    for (var i = 0; i < 20; i++) {
+        walkers[i] = randomWalker();
+    }
+    function emitDot(dot) {
+        dots.push(dot);
+    }
+    function addressWalkers() {
+        for (var i = 0 ; i < walkers.length; i++) {
+            walkers[i].walk();
+            emitDot(walkers[i].dot());
+        }
+    }
+    function randit() {
+        if (Math.random() > 0.9) {
+            changeFace();
+        }
+
+        addressWalkers();
+
+        fade();
+
+        while (dots.length > 0) {
+            drawDot(dots.pop());
+        }
+    }
+    
+    setInterval(randit, 1000/30);
+};
+</script>
+</body>
+</html>
