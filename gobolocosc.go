@@ -31,12 +31,17 @@ func locatorMessage(l sphero.Locator) *osc.OscMessage {
 	return msg
 }
 
+type TypeWrap struct {
+	TypeName string
+	Data interface{}
+}
 
 func sendCollision(client *osc.OscClient, c sphero.Collision) {
 	msg := collisionMessage(c) 
 	fmt.Printf("Sending Collision %v\n", msg)
-	fmt.Printf("Sending Collision %v\n", json.Marshal(msg))
-
+	strJson,_ := json.Marshal(TypeWrap{TypeName:"Collision", Data:c})
+	fmt.Printf("Sending Collision %v\n", string(strJson))
+	SpamChannels(string(strJson))
 	//SpamChannels(fmt.Sprintf("Sending Collision %v\n", msg))
 	client.Send(  msg )
 }
@@ -44,7 +49,9 @@ func sendCollision(client *osc.OscClient, c sphero.Collision) {
 func sendLocator(client *osc.OscClient, l sphero.Locator) {
 	msg := locatorMessage(l)
 	fmt.Printf("Sending Locator %v\n", msg)
-	//SpamChannels(fmt.Sprintf("Sending Locator %v\n", msg))
+	strJson,_ := json.Marshal(TypeWrap{TypeName:"Locator", Data:l})
+	fmt.Printf("Sending Locator %v\n", string(strJson))
+	SpamChannels(string(strJson))
 	client.Send( msg )
 }
 
@@ -54,7 +61,7 @@ func main() {
 	port := 9999
 	client := osc.NewOscClient(ip, port)
 
-	//go Web()
+	go Web()
 
 
 	gbot := gobot.NewGobot()
@@ -74,8 +81,8 @@ func main() {
 		})
 
 		gobot.On(spheroDriver.Event("locator"), func(data interface{}) {
-			//fmt.Printf("Locator Detected!%+v\n", data)
-			//sendLocator(client,data.(sphero.Locator))
+			fmt.Printf("Locator Detected!%+v\n", data)
+			sendLocator(client,data.(sphero.Locator))
 		})
 
 
@@ -89,8 +96,8 @@ func main() {
 				fmt.Printf("Trying to enable Collision Detection!\n")
 				spheroDriver.ConfigureCollisionDetectionRaw(0x30, 0x30, 0x30, 0x30, 20)
 				fmt.Printf("Trying to enable LOcator!\n")
-
-				//spheroDriver.ConfigureLocatorStreaming(2)
+				
+				spheroDriver.ConfigureLocatorStreaming(2)
 			}
 
 		})

@@ -54,6 +54,6 @@ func Web() {
 	})	
 	http.Handle("/event", websocket.Handler(EventServer))
 	http.Handle("/", http.FileServer(http.Dir("static")))
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":6660", nil))
 	
 }
