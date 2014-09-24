@@ -11,7 +11,7 @@ import (
 
 var evch []chan string
 
-func spamChannels(event string) {
+func SpamChannels(event string) {
 	for _, ochan := range evch {
 		ochan <- event
 	}
@@ -19,7 +19,7 @@ func spamChannels(event string) {
 
 func eventGenerator() {
 	for {
-		spamChannels(time.Now().String())
+		SpamChannels(time.Now().String())
 		time.Sleep(1 * time.Second)		
 	}
 }
@@ -42,11 +42,10 @@ func (f HelloWorldHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello World %q", html.EscapeString(r.URL.Path))
 }
 
+func Web() {
 
+	// go eventGenerator()
 
-func main() {
-
-	go eventGenerator()
 	HelloWorldHandler := HelloWorldHandler{}
 
 	http.Handle("/hello", HelloWorldHandler)	

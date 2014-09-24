@@ -1,0 +1,75 @@
+* Single Celled Doubt
+** Description
+  Title: Single-celled doubts
+  Artist: Abram Hindle / SkruntSkrunt
+
+  Summary: A blind bacterium feels its way around the floor, lacking
+  most kinds of sensory organs it is blind and alone. Will it find
+  companionship among the feet of the audience? Or will the tones of
+  its self conscious drone out any interaction it might feel?
+
+  Overview: A small sphere (bacterium / sphero/ robot) will be placed
+  on the venue's floor. It will explore the world around it the only
+  way it can, by moving and feeling. As it explores the world around
+  it, it's worldview or memory grows and with it, it's worry and self
+  doubt. It's brain will be sonified for all to hear, it's internal
+  monologue projected over the PA. As it feels and hits things it will
+  move between modes of exploration, fear, self-preservation and
+  doubt.
+
+  Technical view: a robot bounces around the room bumping into the
+  feet of the audience and interacting with them. The events from the
+  robot will be sonified and heard over the PA. The performer will man
+  the main computer, monitoring the robot and managing the aesthetics
+  of the audio.
+
+
+  Equipment provided by artist:
+
+  1 sphero robot
+  1 laptop
+  1 bluetooth adapter
+  1 mini jack to 1/4 inch out
+
+  Equipment needed:
+
+  Speakers
+  Projector
+  Projector Screen
+  1 Mic for explanation
+
+  Video might be generated/provided.
+  
+  Timing: 10 minutes to 20 minutes.
+** Tasks
+   - Emotions 
+     - Anger/frustration
+       - red blue flashing?
+     - Sadness
+       - green
+     - Happy
+       - yellow
+     - confused
+       - white/off?
+   - Visualization
+     - Emotion
+     - Path?
+     - Brain?
+   - Decisions?
+     - Random Walk?
+     - collision behaviour?
+** Sounds
+   - Anger
+     - rough bassy
+   - Sadness 
+     - strings
+   - Happy
+      - random computery squeals?
+   - Confused
+     - more noisey random boop booo?
+** Visuals
+   - Random Path 
+     - additive
+   - General Colour Scheme
+   - Communicate using OSC?
+   - Maybe just webbased?
