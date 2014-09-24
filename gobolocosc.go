@@ -36,6 +36,11 @@ type TypeWrap struct {
 	Data interface{}
 }
 
+type ColourChange struct {
+	R,G,B uint8
+}
+
+
 func sendCollision(client *osc.OscClient, c sphero.Collision) {
 	msg := collisionMessage(c) 
 	fmt.Printf("Sending Collision %v\n", msg)
@@ -68,6 +73,14 @@ func main() {
 
 	adaptor := sphero.NewSpheroAdaptor("Sphero", "/dev/rfcomm0")
 	spheroDriver := sphero.NewSpheroDriver(adaptor, "sphero")
+
+	colourChange := func(r, g, b uint8) {
+		strJson,_ := json.Marshal(TypeWrap{TypeName:"Colour", Data:(ColourChange{r,g,b})})
+		fmt.Printf("Sending Colour Change %v\n", string(strJson))
+		SpamChannels(string(strJson))
+		spheroDriver.SetRGB(r, g, b)		
+	}
+
 	collisions := 0
 	work := func() {
 		//spheroDriver.ConfigureCollisionDetectionRaw(40, 60, 40, 60, 100)
@@ -87,7 +100,7 @@ func main() {
 
 
 		gobot.Every(time.Second, func() {
-			//spheroDriver.Roll(uint8(gobot.Rand(128)), uint16(gobot.Rand(360)))
+			spheroDriver.Roll(uint8(gobot.Rand(128)), uint16(gobot.Rand(360)))
 			//fmt.Printf("Collisions: %v\n", collisions)
 
 		})
@@ -104,10 +117,12 @@ func main() {
 
 		gobot.Every(1*time.Second, func() {
 			//spheroDriver.ConfigureLocatorStreaming(2)
-			//r := uint8(255)
-			//g := uint8(gobot.Rand(255))
-			//b := uint8(gobot.Rand(255))
 			
+			r := uint8(255)
+			g := uint8(gobot.Rand(255))
+			b := uint8(gobot.Rand(255))
+			colourChange(r,g,b)
+
 			//spheroDriver.SetRGB(r, g, b)
 		})
 

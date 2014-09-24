@@ -54,6 +54,19 @@ window.onload = function() {
     var W = canvas.width  = window.innerWidth-6;
     var H = canvas.height = window.innerHeight-50;
 
+
+    var wsSocket = new WebSocket("ws://"+window.location.host+"/event",
+                                 "event");
+    var handleMessage;
+    wsSocket.onopen = function (event) { };
+    wsSocket.onmessage = function (event) {
+        console.log(event.data);
+        var obj = JSON.parse(event.data);
+        handleMessage(obj);
+    };
+
+
+
     function choose(arr) {
         return arr[Math.floor(Math.random()*arr.length)];
     };
@@ -74,6 +87,7 @@ window.onload = function() {
     function drawDot(obj) {
         console.log(obj);
         ctx.beginPath();
+        ctx.fillStyle=obj["colour"]||"#000000";
         ctx.arc(obj["x"] % W, obj["y"] % H, obj["radius"]||10, obj["sa"]||0, obj["ea"]||Math.PI*2, obj["ac"]);
         ctx.fill();       
 
@@ -84,7 +98,7 @@ window.onload = function() {
         }
         ctx.save();
         ctx.globalCompositeOperation = "none";
-        ctx.globalAlpha = 10.0 / 100;
+        ctx.globalAlpha = 1.0 / 100;
 
         ctx.fillStyle = "#ffffff"
 
@@ -117,7 +131,7 @@ window.onload = function() {
         return walker;
     }
     var walkers = [];
-    for (var i = 0; i < 20; i++) {
+    for (var i = 0; i < 0; i++) {
         walkers[i] = randomWalker();
     }
     function emitDot(dot) {
@@ -142,7 +156,60 @@ window.onload = function() {
             drawDot(dots.pop());
         }
     }
-    
+    function wrap(v,max) {
+        if (v > 0) {
+            return v % max;
+        } else {
+            return max - (v%max);
+        }
+    }
+    handleMessage = function(obj) {
+        if (obj.TypeName === "Colour") {
+            var doce = document.getElementById("feelings");
+            doce.style.color = "rgb("+obj.Data.R+","+obj.Data.G+","+obj.Data.B+")";            
+        }
+        if (obj.TypeName === "Locator") {
+            var dot =  {
+                "x": wrap(obj.Data.Xpos*4, W),
+                "y": wrap(obj.Data.Ypos*4, H),
+                "radius": 10 + (obj.Data.Accel - 70) % 50,
+            };
+            emitDot(dot);
+
+            emitDot({"x":dot.y,"y":dot.x,"radius":dot.radius});            
+            emitDot({"x":wrap(W-dot.x,W),"y":dot.y,"radius":dot.radius});            
+
+            var dot =  {
+                "x": wrap(obj.Data.Xvel, W),
+                "y": wrap(obj.Data.Yvel, H),
+                "radius": 10,
+                "colour": "#00FF00",
+            };
+            emitDot(dot);
+
+            var dot =  {
+                "x": wrap(W/2 + obj.Data.Accel - 100, W),
+                "y": wrap(H/2 + obj.Data.Accel - 100, H),
+                "radius": 10,
+                "colour": "#0000FF",
+            };
+            emitDot(dot);
+
+
+        }
+        if (obj.TypeName === "Collision") {
+            //Sending Collision {"TypeName":"Collision","Data":{"X":-946,"Y":-39,"Z":0,"Axis":1,"XMagnitude":50,"YMagnitude":13,"Speed":0,"Timestamp":2413229}}
+            var dot =  {
+                "x": W/2,
+                "y": H/2,
+                "radius": 5*( obj.Data.XMagnitude + obj.Data.YMagnitude + obj.Data.Speed),
+                "colour":"rgba(255,0,0,0.1)"
+            };
+            emitDot(dot);
+
+        }
+
+    };
     setInterval(randit, 1000/30);
 };
 </script>
