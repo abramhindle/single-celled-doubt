@@ -6,6 +6,7 @@ import (
 	"github.com/hypebeast/go-osc/osc"
 	"github.com/edmontongo/gobot"
 	"github.com/edmontongo/gobot/platforms/sphero"
+	"encoding/json"
 )
 
 func collisionMessage(c sphero.Collision) *osc.OscMessage {
@@ -34,6 +35,7 @@ func locatorMessage(l sphero.Locator) *osc.OscMessage {
 func sendCollision(client *osc.OscClient, c sphero.Collision) {
 	msg := collisionMessage(c) 
 	fmt.Printf("Sending Collision %v\n", msg)
+	fmt.Printf("Sending Collision %v\n", json.Marshal(msg))
 
 	//SpamChannels(fmt.Sprintf("Sending Collision %v\n", msg))
 	client.Send(  msg )
