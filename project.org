@@ -1,5 +1,6 @@
 * Emergency ToDO
   - Set Emotion
+  - Change on the visuals
 * Single Celled Doubt
 ** Description
   Title: Single-celled doubts

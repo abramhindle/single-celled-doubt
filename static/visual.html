@@ -174,8 +174,8 @@ window.onload = function() {
         }
         if (obj.TypeName === "Locator") {
             var dot =  {
-                "x": wrap(obj.Data.Xpos, W),
-                "y": wrap(obj.Data.Ypos, H),
+                "x": wrap(obj.Data.Xpos*3, W),
+                "y": wrap(obj.Data.Ypos*3, H),
                 "radius": 10 + (Math.sqrt(sqr(obj.Data.Xvel) + sqr(obj.Data.Yvel)  + sqr(obj.Data.Accel))) % 50
             };
             emitDot(dot);
