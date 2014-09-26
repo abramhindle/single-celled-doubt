@@ -27,6 +27,8 @@ s.sync;
 //~twin.free;
 ~happyb = Buffer.read(s,"goldberg-aria-da-capo.wav");
 ~harshb = Buffer.read(s,"peergynt5.wav");
+~excitedb = Buffer.read(s,"peergynt2.wav");
+
 
 SynthDef(\bbb, {
 	|b,x=0,y=0,xvel=0,yvel=0,out=0,accel=100,amp=0.5|
@@ -42,8 +44,10 @@ SynthDef(\bbb, {
 		//BufRd.ar(1, b, x*y*LFSaw.ar(BufDur.ir(b).reciprocal).range(0, BufFrames.ir(b)) ))
 	    //BufRd.ar(1, b, x/1000 * BufFrames.ir(b)))
 }).add();
+s.sync;
 ~happy = Synth(\bbb,[\b,~happyb.bufnum]);
 ~harsh = Synth(\bbb,[\b,~harshb.bufnum]);
+~excited = Synth(\bbb,[\b,~excitedb.bufnum]);
 //~bbb.free;
 //-10.0.abs
 
@@ -84,6 +88,14 @@ SynthDef(\bbb, {
 	~happy.set(\xvel, msg[4]);
 	~happy.set(\yvel, msg[5]);
 
+	"excited".postln;
+	~excited.set(\x, msg[1]);
+	~excited.set(\y, msg[2]);
+	~excited.set(\accel, msg[3]);
+	~excited.set(\xvel, msg[4]);
+	~excited.set(\yvel, msg[5]);
+
+
 	msg.postln
 };
 
@@ -95,11 +107,11 @@ SynthDef(\bbb, {
 
 ~ldc = {|msg, time, addr, recvPort| 
 	~collisionf.(msg,time,addr,recvPort)
-}
+};
 
 ~ldl = {|msg, time, addr, recvPort| 
 	~locatorf.(msg,time,addr,recvPort)
-}
+};
 
 ~collision = OSCFunc.newMatching(~ldc, '/collision');
 ~locator = OSCFunc.newMatching(~ldl, '/locator');
