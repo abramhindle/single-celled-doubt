@@ -31,7 +31,7 @@
 	<canvas class="can" id="canvas" width="100%" height="100%" style="-webkit-tap-highlight-color: transparent;"></canvas> 
 
 <script>
-
+var lastEmotion = "happy";
 var faces = {
     "happy":[":)",":D",";)"],
     "sad"  :[":(",":/",":C",":_("],
@@ -145,7 +145,7 @@ window.onload = function() {
     }
     function randit() {
         if (Math.random() > 0.9) {
-            changeFace();
+            changeFace(lastEmotion);
         }
 
         addressWalkers();
@@ -212,8 +212,13 @@ window.onload = function() {
             emitDot(dot);
 
         }
+        if (obj.TypeName === "Emotion") {
+            lastEmotion = obj.Data
+            changeFace(lastEmotion);            
+        }
 
     };
+    changeFace(lastEmotion);
     setInterval(randit, 1000/30);
 };
 </script>

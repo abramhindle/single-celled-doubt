@@ -60,13 +60,41 @@ func sendLocator(client *osc.OscClient, l sphero.Locator) {
 	client.Send( msg )
 }
 
+type OscCB struct {
+	osc *osc.OscClient
+}
+
+func MakeOSCCB(osc * osc.OscClient) OscCB {
+	return OscCB{osc}
+}
+
+func emotionMessage(emotion string) *osc.OscMessage {
+	msg := osc.NewOscMessage("/emotion")
+	msg.Append(string(emotion))
+	return msg
+}
+
+
+func (cb OscCB) Cb(emoter * Emoter) {
+	message := emotionMessage(emoter.Current)
+	cb.osc.Send(message)
+	strJson,_ := json.Marshal(TypeWrap{TypeName:"Emotion", Data:emoter.Current})
+	fmt.Printf("Sending Emotion %v\n", string(strJson))
+	SpamChannels(string(strJson))
+
+}
+
+
 
 func main() {
 	ip := "127.0.0.1"
 	port := 57120
 	client := osc.NewOscClient(ip, port)
 
-	go Web()
+	emoter := MakeEmoter()
+	emoter.SetAll(MakeOSCCB(client))
+
+	go Web(emoter)
 
 
 	gbot := gobot.NewGobot()

@@ -1,6 +1,12 @@
 s.boot;
 s.scope;
 
+/*
+	ToDo:
+	- [X] set emotion
+*/
+
+
 /* ideas:
 	- axion buzzing and fitzing
 	- collision bang
@@ -57,7 +63,7 @@ s.sync;
 	~twin.set(\xvel, msg[4]);
 	~twin.set(\yvel, msg[5]);
 
-	~happy.set(\amp, 0.5);
+	//~happy.set(\amp, 0.5);
 	~happy.set(\x, msg[1]);
 	~happy.set(\y, msg[2]);
 	~happy.set(\accel, msg[3]);
@@ -81,7 +87,7 @@ s.sync;
 	~twin.set(\xvel, msg[4]);
 	~twin.set(\yvel, msg[5]);
 
-	~happy.set(\amp, 1.0);
+	//	~happy.set(\amp, 1.0);
 	~happy.set(\x, msg[1]);
 	~happy.set(\y, msg[2]);
 	~happy.set(\accel, msg[3]);
@@ -100,9 +106,57 @@ s.sync;
 };
 
 
+~myl = ();
 
 ~collisionf = ~clistener;
 ~locatorf = ~listener;
+
+d = Dictionary.new;
+d["sad"] = {
+	"Sad emotion!".postln;
+	~happy.set(\amp, 0.1);
+	~harsh.set(\amp, 0.01);
+	~excited.set(\amp,0.01);
+	~twin.set(\amp, 0.01);
+};
+d["happy"] = {
+	~happy.set(\amp, 1.0);
+	~harsh.set(\amp, 0.0001);
+	~excited.set(\amp,0.1);
+	~twin.set(\amp, 0.01);
+};
+d["angry"] = {
+	~happy.set(\amp, 0.1);
+	~harsh.set(\amp, 1.0);
+	~excited.set(\amp,0.01);
+	~twin.set(\amp, 0.01);
+
+};
+d["bored"] = {
+	~happy.set(\amp, 0.21);
+	~harsh.set(\amp, 0.01);
+	~excited.set(\amp,0.01);
+	~twin.set(\amp, 0.1);
+
+};
+
+~callemotion = { |emotion|
+	emotion.postln;
+	d[emotion.asString].postln;
+	d[emotion.asString].();
+};
+"key".asString
+~callemotion.("happy");
+~emotionf = {
+	|msg, time, addr, recvPort| 
+	var key = msg[1];
+	"111111111111111111111111".postln;
+	~callemotion.(key);
+	"0000000000000".postln;
+};
+
+~emotions.["sad"].()
+
 
 
 ~ldc = {|msg, time, addr, recvPort| 
@@ -113,8 +167,15 @@ s.sync;
 	~locatorf.(msg,time,addr,recvPort)
 };
 
+~lde = {|msg, time, addr, recvPort| 
+	~emotionf.(msg,time,addr,recvPort)
+};
+
+
 ~collision = OSCFunc.newMatching(~ldc, '/collision');
 ~locator = OSCFunc.newMatching(~ldl, '/locator');
+~emotion = OSCFunc.newMatching(~lde, '/emotion');
+~emotion.free;
 //~locator.free()
 /*
 
