@@ -63,7 +63,7 @@ func sendLocator(client *osc.OscClient, l sphero.Locator) {
 
 func main() {
 	ip := "127.0.0.1"
-	port := 9999
+	port := 57120
 	client := osc.NewOscClient(ip, port)
 
 	go Web()
