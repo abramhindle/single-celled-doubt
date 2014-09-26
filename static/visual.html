@@ -160,8 +160,12 @@ window.onload = function() {
         if (v > 0) {
             return v % max;
         } else {
-            return max - (v%max);
+            return max - (-v)% max;
+            //return max - (v%max);
         }
+    }
+    function sqr(x) {
+        return x*x;
     }
     handleMessage = function(obj) {
         if (obj.TypeName === "Colour") {
@@ -170,9 +174,9 @@ window.onload = function() {
         }
         if (obj.TypeName === "Locator") {
             var dot =  {
-                "x": wrap(obj.Data.Xpos*4, W),
-                "y": wrap(obj.Data.Ypos*4, H),
-                "radius": 10 + (obj.Data.Accel - 70) % 50,
+                "x": wrap(obj.Data.Xpos, W),
+                "y": wrap(obj.Data.Ypos, H),
+                "radius": 10 + (Math.sqrt(sqr(obj.Data.Xvel) + sqr(obj.Data.Yvel)  + sqr(obj.Data.Accel))) % 50
             };
             emitDot(dot);
 

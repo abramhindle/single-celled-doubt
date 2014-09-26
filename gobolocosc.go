@@ -82,6 +82,7 @@ func main() {
 	}
 
 	collisions := 0
+	locations := 0
 	work := func() {
 		//spheroDriver.ConfigureCollisionDetectionRaw(40, 60, 40, 60, 100)
 		spheroDriver.ConfigureCollisionDetectionRaw(0x30, 0x30, 0x30, 0x30, 20)
@@ -96,6 +97,7 @@ func main() {
 		gobot.On(spheroDriver.Event("locator"), func(data interface{}) {
 			fmt.Printf("Locator Detected!%+v\n", data)
 			sendLocator(client,data.(sphero.Locator))
+			locations = locations + 1
 		})
 
 
@@ -105,7 +107,7 @@ func main() {
 
 		})
 		gobot.Every(time.Second, func() {
-			if (collisions < 1) {
+			if (collisions < 1 && locations < 1) {
 				fmt.Printf("Trying to enable Collision Detection!\n")
 				spheroDriver.ConfigureCollisionDetectionRaw(0x30, 0x30, 0x30, 0x30, 20)
 				fmt.Printf("Trying to enable LOcator!\n")
