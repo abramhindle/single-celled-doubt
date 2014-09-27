@@ -34,14 +34,14 @@ s.sync;
 ~happyb = Buffer.read(s,"goldberg-aria-da-capo.wav");
 ~harshb = Buffer.read(s,"peergynt5.wav");
 ~excitedb = Buffer.read(s,"peergynt2.wav");
-
+~sadb = Buffer.read(s,"Gesualdo-O_vos_omnes-stretch.wav");
 
 SynthDef(\bbb, {
-	|b,x=0,y=0,xvel=0,yvel=0,out=0,accel=100,amp=0.5|
+	|b,x=0,y=0,xvel=0,yvel=0,out=0,accel=100,amp=0.5,rate=1.0|
 	Out.ar(out,
 		amp * Mix.ar(
-			BufRd.ar(1, b, LFSaw.ar((x/1000.0)*BufDur.ir(b).reciprocal).range(0, BufFrames.ir(b))),
-			BufRd.ar(1, b, LFSaw.ar((y/1000.0)*BufDur.ir(b).reciprocal).range(0, BufFrames.ir(b))),
+			BufRd.ar(1, b, LFSaw.ar(rate*(x/1000.0)*BufDur.ir(b).reciprocal).range(0, BufFrames.ir(b))),
+			BufRd.ar(1, b, LFSaw.ar(rate*(y/1000.0)*BufDur.ir(b).reciprocal).range(0, BufFrames.ir(b))),
 			BufRd.ar(1, b, LFSaw.ar(((yvel*xvel)/(50*50.0))*BufDur.ir(b).reciprocal).range(0, BufFrames.ir(b))),
 		))
 
@@ -54,6 +54,9 @@ s.sync;
 ~happy = Synth(\bbb,[\b,~happyb.bufnum]);
 ~harsh = Synth(\bbb,[\b,~harshb.bufnum]);
 ~excited = Synth(\bbb,[\b,~excitedb.bufnum]);
+~sad = Synth(\bbb,[\b,~sadb.bufnum]);
+~sad.set(\amp,1.0)
+
 //~bbb.free;
 //-10.0.abs
 
@@ -70,7 +73,20 @@ s.sync;
 	~happy.set(\xvel, msg[4]);
 	~happy.set(\yvel, msg[5]);
 
-	"harsh".postln;
+	~sad.set(\x, msg[1]);
+	~sad.set(\y, msg[2]);
+	~sad.set(\accel, msg[3]);
+	~sad.set(\xvel, msg[4]);
+	~sad.set(\yvel, msg[5]);
+
+	~excited.set(\x, msg[1]);
+	~excited.set(\y, msg[2]);
+	~excited.set(\accel, msg[3]);
+	~excited.set(\xvel, msg[4]);
+	~excited.set(\yvel, msg[5]);
+
+
+
 	~harsh.set(\x, msg[1]);
 	~harsh.set(\y, msg[2]);
 	~harsh.set(\accel, msg[3]);
@@ -101,7 +117,11 @@ s.sync;
 	~excited.set(\xvel, msg[4]);
 	~excited.set(\yvel, msg[5]);
 
-
+	~harsh.set(\x, msg[1]);
+	~harsh.set(\y, msg[2]);
+	~harsh.set(\accel, msg[3]);
+	~harsh.set(\xvel, msg[4]);
+	~harsh.set(\yvel, msg[5]);
 	msg.postln
 };
 
@@ -118,18 +138,26 @@ d["sad"] = {
 	~harsh.set(\amp, 0.01);
 	~excited.set(\amp,0.01);
 	~twin.set(\amp, 0.01);
+	~sad.set(\amp,10.0);
+	~sad.set(\rate,20.0);
 };
 d["happy"] = {
-	~happy.set(\amp, 1.0);
+	~happy.set(\amp, 4.0);
 	~harsh.set(\amp, 0.0001);
 	~excited.set(\amp,0.1);
 	~twin.set(\amp, 0.01);
+	~sad.set(\amp,0.001);
+	~sad.set(\rate,2.0);
+	~happy.rate(\rate,2.0);
+
 };
 d["angry"] = {
 	~happy.set(\amp, 0.1);
 	~harsh.set(\amp, 1.0);
 	~excited.set(\amp,0.01);
 	~twin.set(\amp, 0.01);
+	~sad.set(\amp,0.001);
+	~sad.set(\rate,1.0);
 
 };
 d["bored"] = {
@@ -137,6 +165,8 @@ d["bored"] = {
 	~harsh.set(\amp, 0.01);
 	~excited.set(\amp,0.01);
 	~twin.set(\amp, 0.1);
+	~sad.set(\amp,0.1);
+	~sad.set(\rate,3.0);
 
 };
 
@@ -145,7 +175,6 @@ d["bored"] = {
 	d[emotion.asString].postln;
 	d[emotion.asString].();
 };
-"key".asString
 ~callemotion.("happy");
 ~emotionf = {
 	|msg, time, addr, recvPort| 
@@ -155,7 +184,8 @@ d["bored"] = {
 	"0000000000000".postln;
 };
 
-~emotions.["sad"].()
+
+~callemotion.("sad");
 
 
 
@@ -175,7 +205,7 @@ d["bored"] = {
 ~collision = OSCFunc.newMatching(~ldc, '/collision');
 ~locator = OSCFunc.newMatching(~ldl, '/locator');
 ~emotion = OSCFunc.newMatching(~lde, '/emotion');
-~emotion.free;
+//~emotion.free;
 //~locator.free()
 /*
 

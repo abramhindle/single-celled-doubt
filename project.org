@@ -1,6 +1,9 @@
 * Emergency ToDO
   - Set Emotion
   - Change on the visuals
+  - add sad sound
+  - add emotion controll
+  - add buzz sound
 * Single Celled Doubt
 ** Description
   Title: Single-celled doubts
