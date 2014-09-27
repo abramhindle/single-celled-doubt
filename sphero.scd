@@ -28,13 +28,6 @@ SynthDef(\twin, {
 	Out.ar(out,
 		DelayL.ar(sig, 0.9, 0.5, 0.5, sig))
 }).add();
-s.sync;
-~twin = Synth(\twin);
-//~twin.free;
-~happyb = Buffer.read(s,"goldberg-aria-da-capo.wav");
-~harshb = Buffer.read(s,"peergynt5.wav");
-~excitedb = Buffer.read(s,"peergynt2.wav");
-~sadb = Buffer.read(s,"Gesualdo-O_vos_omnes-stretch.wav");
 
 SynthDef(\bbb, {
 	|b,x=0,y=0,xvel=0,yvel=0,out=0,accel=100,amp=0.5,rate=1.0|
@@ -44,13 +37,19 @@ SynthDef(\bbb, {
 			BufRd.ar(1, b, LFSaw.ar(rate*(y/1000.0)*BufDur.ir(b).reciprocal).range(0, BufFrames.ir(b))),
 			BufRd.ar(1, b, LFSaw.ar(((yvel*xvel)/(50*50.0))*BufDur.ir(b).reciprocal).range(0, BufFrames.ir(b))),
 		))
-
-	//BufRd.ar(1, b, ((x+y+yvel)/1000.0).wrap(0,1.0)+LFSaw.ar((1.0/7.0)*BufDur.ir(b).reciprocal,iphase: x/1000.0).range(0, BufFrames.ir(b))))
-
-		//BufRd.ar(1, b, x*y*LFSaw.ar(BufDur.ir(b).reciprocal).range(0, BufFrames.ir(b)) ))
-	    //BufRd.ar(1, b, x/1000 * BufFrames.ir(b)))
 }).add();
-s.sync;
+
+
+
+//s.sync;
+~twin = Synth(\twin);
+//~twin.free;
+~happyb = Buffer.read(s,"goldberg-aria-da-capo.wav");
+~harshb = Buffer.read(s,"peergynt5.wav");
+~excitedb = Buffer.read(s,"peergynt2.wav");
+~sadb = Buffer.read(s,"Gesualdo-O_vos_omnes-stretch.wav");
+
+//s.sync;
 ~happy = Synth(\bbb,[\b,~happyb.bufnum]);
 ~harsh = Synth(\bbb,[\b,~harshb.bufnum]);
 ~excited = Synth(\bbb,[\b,~excitedb.bufnum]);
@@ -135,11 +134,11 @@ d = Dictionary.new;
 d["sad"] = {
 	"Sad emotion!".postln;
 	~happy.set(\amp, 0.1);
-	~harsh.set(\amp, 0.01);
-	~excited.set(\amp,0.01);
-	~twin.set(\amp, 0.01);
-	~sad.set(\amp,10.0);
-	~sad.set(\rate,20.0);
+	~harsh.set(\amp, 0.001);
+	~excited.set(\amp,0.001);
+	~twin.set(\amp, 0.001);
+	~sad.set(\amp,4.0);
+	~sad.set(\rate,5.0);
 };
 d["happy"] = {
 	~happy.set(\amp, 4.0);
@@ -148,7 +147,7 @@ d["happy"] = {
 	~twin.set(\amp, 0.01);
 	~sad.set(\amp,0.001);
 	~sad.set(\rate,2.0);
-	~happy.rate(\rate,2.0);
+	~happy.set(\rate,5.0);
 
 };
 d["angry"] = {
@@ -167,7 +166,6 @@ d["bored"] = {
 	~twin.set(\amp, 0.1);
 	~sad.set(\amp,0.1);
 	~sad.set(\rate,3.0);
-
 };
 
 ~callemotion = { |emotion|
