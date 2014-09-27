@@ -140,6 +140,9 @@ d["sad"] = {
 	~sad.set(\amp,4.0);
 	~sad.set(\rate,5.0);
 };
+
+
+
 d["happy"] = {
 	~happy.set(\amp, 4.0);
 	~harsh.set(\amp, 0.0001);
@@ -167,6 +170,9 @@ d["bored"] = {
 	~sad.set(\amp,0.1);
 	~sad.set(\rate,3.0);
 };
+
+~click = {|freq=0.5,size=0.2| Out.ar(1,CombN.ar(Decay.ar(Dust.ar(freq,size), 0.01, WhiteNoise.ar), 0.2, 0.2, 3)) }.play;
+//~click.set(\freq,0.2);
 
 ~callemotion = { |emotion|
 	emotion.postln;
