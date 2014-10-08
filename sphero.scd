@@ -139,6 +139,7 @@ d["sad"] = {
 	~twin.set(\amp, 0.001);
 	~sad.set(\amp,4.0);
 	~sad.set(\rate,5.0);
+	~excited.set(\rate, 100.0.rand);
 };
 
 
@@ -149,14 +150,16 @@ d["happy"] = {
 	~excited.set(\amp,0.1);
 	~twin.set(\amp, 0.01);
 	~sad.set(\amp,0.001);
-	~sad.set(\rate,2.0);
-	~happy.set(\rate,5.0);
+	~sad.set(\rate,30.0);
+	~happy.set(\rate,46.0);
 
 };
 d["angry"] = {
 	~happy.set(\amp, 0.1);
 	~harsh.set(\amp, 1.0);
-	~excited.set(\amp,0.01);
+	~harsh.set(\rate, 66.0);
+	~excited.set(\amp,0.21);
+	~excited.set(\rate,200.0.rand);
 	~twin.set(\amp, 0.01);
 	~sad.set(\amp,0.001);
 	~sad.set(\rate,1.0);
@@ -165,14 +168,16 @@ d["angry"] = {
 d["bored"] = {
 	~happy.set(\amp, 0.21);
 	~harsh.set(\amp, 0.01);
-	~excited.set(\amp,0.01);
-	~twin.set(\amp, 0.1);
+	~excited.set(\amp,0.51);
+	~twin.set(\amp, 0.03);
 	~sad.set(\amp,0.1);
 	~sad.set(\rate,3.0);
+	//{|freq=0.5,size=0.2| Out.ar(1,CombN.ar(Decay.ar(Dust.ar(freq,size), 0.01, WhiteNoise.ar), 0.2, 0.2, 3)) }.play;
+
 };
 
-~click = {|freq=0.5,size=0.2| Out.ar(1,CombN.ar(Decay.ar(Dust.ar(freq,size), 0.01, WhiteNoise.ar), 0.2, 0.2, 3)) }.play;
-//~click.set(\freq,0.2);
+~click = {|freq=10,size=0.2| Out.ar(1,CombN.ar(Decay.ar(Dust.ar(freq,size), 0.01, WhiteNoise.ar), 0.2, 0.2, 3)) }.play;
+//~click.set(\freq,0.5);
 
 ~callemotion = { |emotion|
 	emotion.postln;
