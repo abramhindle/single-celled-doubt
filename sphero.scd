@@ -131,7 +131,7 @@ r.set(\damp, 0.9);
 	~excited.set(\xvel, msg[4]);
 	~excited.set(\yvel, msg[5]);
 
-
+	~dhydro.set(\freq, (msg[5]+1)*(msg[4]+1));
 
 	~harsh.set(\x, msg[1]);
 	~harsh.set(\y, msg[2]);
@@ -187,6 +187,11 @@ d["sad"] = {
 	~sad.set(\amp,4.0);
 	~sad.set(\rate,5.0);
 	~excited.set(\rate, 100.0.rand);
+
+
+	~dhydro.set(\freq, 10.0.rand + 420.0);
+	~dhydro.set(\density, 0.5 + 3.0.rand);
+
 };
 
 
@@ -199,7 +204,9 @@ d["happy"] = {
 	~sad.set(\amp,0.001);
 	~sad.set(\rate,30.0);
 	~happy.set(\rate,46.0);
-
+	~dhydro.set(\freq, 1000.0.rand + 2333.0);
+	~dhydro.set(\density, 0.5 + 10.0.rand);
+	
 };
 d["angry"] = {
 	~happy.set(\amp, 0.1);
@@ -210,6 +217,8 @@ d["angry"] = {
 	~twin.set(\amp, 0.01);
 	~sad.set(\amp,0.001);
 	~sad.set(\rate,1.0);
+	~dhydro.set(\freq, 10.0.rand + 80.0);
+	~dhydro.set(\density, 0.5 + 2.0.rand);
 
 };
 d["bored"] = {
@@ -220,6 +229,8 @@ d["bored"] = {
 	~sad.set(\amp,0.1);
 	~sad.set(\rate,3.0);
 	//{|freq=0.5,size=0.2| Out.ar(1,CombN.ar(Decay.ar(Dust.ar(freq,size), 0.01, WhiteNoise.ar), 0.2, 0.2, 3)) }.play;
+	~dhydro.set(\freq, 10.0.rand + 220.0);
+	~dhydro.set(\density, 0.2 + 1.0.rand);
 
 };
 
@@ -242,7 +253,10 @@ d["bored"] = {
 };
 
 
+~callemotion.("happy");
 ~callemotion.("sad");
+~callemotion.("angry");
+~callemotion.("bored");
 
 
 

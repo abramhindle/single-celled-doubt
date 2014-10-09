@@ -21,15 +21,19 @@
     width: 100%
     height: 100%;
 }
+
+canvas {
+    padding: 0px;
+    margin: -10px;
+}
+
     </style>
 
   </head>
-  <body>
+  <body id="body">
 <div class="feelings" id="feelings">
-:(
 </div>
 	<canvas class="can" id="canvas" width="100%" height="100%" style="-webkit-tap-highlight-color: transparent;"></canvas> 
-
 <script>
 var lastEmotion = "happy";
 var faces = {
@@ -47,12 +51,19 @@ var faceColor = {
 
 var dots = [];
 
+//+ Jonas Raoni Soares Silva
+//@ http://jsfromhell.com/array/shuffle [v1.0]
+function shuffle(o){ //v1.0
+    for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+    return o;
+};
 
 window.onload = function() {
     var canvas = document.getElementById('canvas');
     var ctx = canvas.getContext('2d');
-    var W = canvas.width  = window.innerWidth-6;
-    var H = canvas.height = window.innerHeight-50;
+    var W = canvas.width  = window.innerWidth-1;
+    var H = canvas.height = window.innerHeight-1;
+
 
 
     var wsSocket = new WebSocket("ws://"+window.location.host+"/event",
@@ -79,20 +90,41 @@ window.onload = function() {
         }
         console.log("face");        
         var ourFace = choose(faces[emotion]);
-        var obj = document.getElementById("feelings");
+        //var obj = document.getElementById("feelings");
+        var obj = document.getElementById("body");
         obj.style.color = faceColor[emotion];
-        obj.innerHTML = ourFace;
+        fade(0.5, faceColor[emotion]);
+        //obj.innerHTML = ourFace;
     };
 
     function drawDot(obj) {
-        console.log(obj);
+        if (obj["type"] === "poly") {
+            return drawPoly(obj);
+        }
         ctx.beginPath();
-        ctx.fillStyle=obj["colour"]||"#000000";
+        ctx.fillStyle=obj["colour"]||"#FFFFFF";
         ctx.arc(obj["x"] % W, obj["y"] % H, obj["radius"]||10, obj["sa"]||0, obj["ea"]||Math.PI*2, obj["ac"]);
         ctx.fill();       
 
     }
-    function fade(n) {
+
+    function drawPoly(obj) {
+        ctx.beginPath();
+        ctx.fillStyle=obj["colour"]||"#FFFFFF";
+        ctx.strokeStyle=obj["colour"]||"#FFFFFF";
+        for (var i = 0 ; i < obj.points.length; i++) {
+            var point = obj.points[i];
+            if (i == 0) {
+                ctx.moveTo(point.x, point.y);
+            } else {
+                ctx.lineTo(point.x, point.y);
+            }
+        }
+        ctx.closePath();
+        ctx.stroke();       
+    }
+
+    function fade(n,color) {
         if (n === undefined) {
             n = 0.5;
         }
@@ -100,7 +132,7 @@ window.onload = function() {
         ctx.globalCompositeOperation = "none";
         ctx.globalAlpha = 1.0 / 100;
 
-        ctx.fillStyle = "#ffffff"
+        ctx.fillStyle = color||"#000000"//ffffff"
 
         ctx.fillRect(0, 0, W,H);
         ctx.restore();        
@@ -137,6 +169,10 @@ window.onload = function() {
     function emitDot(dot) {
         dots.push(dot);
     }
+    function emitPoly(points,colour) {
+        emitDot({"colour":(colour||"#FFFFFF"), "type":"poly", "points":points});
+    }
+
     function addressWalkers() {
         for (var i = 0 ; i < walkers.length; i++) {
             walkers[i].walk();
@@ -169,8 +205,12 @@ window.onload = function() {
     }
     handleMessage = function(obj) {
         if (obj.TypeName === "Colour") {
-            var doce = document.getElementById("feelings");
-            doce.style.color = "rgb("+obj.Data.R+","+obj.Data.G+","+obj.Data.B+")";            
+            //var doce = document.getElementById("feelings");
+            var doce = document.getElementById("body");
+            var color = "rgb("+obj.Data.R+","+obj.Data.G+","+obj.Data.B+")";            
+            doce.style.color = color;
+            fade(0.3, color);
+
         }
         if (obj.TypeName === "Locator") {
             var dot =  {
@@ -179,25 +219,32 @@ window.onload = function() {
                 "radius": 10 + (Math.sqrt(sqr(obj.Data.Xvel) + sqr(obj.Data.Yvel)  + sqr(obj.Data.Accel))) % 50
             };
             emitDot(dot);
+            var dot2 = {"x":dot.y,"y":dot.x,"radius":dot.radius};
+            var dot3 = {"x":wrap(W-dot.x,W),"y":dot.y,"radius":dot.radius};
+            emitDot(dot2);
+            emitDot(dot3);
 
-            emitDot({"x":dot.y,"y":dot.x,"radius":dot.radius});            
-            emitDot({"x":wrap(W-dot.x,W),"y":dot.y,"radius":dot.radius});            
+            emitDot({"type":"poly", "points":[dot,dot2,dot3]});
 
-            var dot =  {
+            var dotV =  {
                 "x": wrap(obj.Data.Xvel, W),
                 "y": wrap(obj.Data.Yvel, H),
                 "radius": 10,
                 "colour": "#00FF00",
             };
-            emitDot(dot);
+            emitDot(dotV);
 
-            var dot =  {
+            var dotA =  {
                 "x": wrap(W/2 + obj.Data.Accel - 100, W),
                 "y": wrap(H/2 + obj.Data.Accel - 100, H),
                 "radius": 10,
                 "colour": "#0000FF",
             };
-            emitDot(dot);
+            emitDot(dotA);
+
+            emitPoly([dotV,dotA],"#00FFFF");
+            emitPoly(shuffle([dot,dotV,dot2,dotA,dot3]),"#000000");
+            emitPoly(shuffle([dot,dotV,dot2,dotA,dot3]),"#FF0000");
 
 
         }

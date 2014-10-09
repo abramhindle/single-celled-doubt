@@ -261,7 +261,7 @@ func main() {
 				spheroDriver.ConfigureCollisionDetectionRaw(0x30, 0x30, 0x30, 0x30, 20)
 				fmt.Printf("Trying to enable LOcator!\n")
 				
-				spheroDriver.ConfigureLocatorStreaming(2)
+				spheroDriver.ConfigureLocatorStreaming(5)
 			}
 
 		})
