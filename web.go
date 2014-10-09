@@ -42,7 +42,17 @@ func (f HelloWorldHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello World %q", html.EscapeString(r.URL.Path))
 }
 
-func Web(emoter Emoter) {
+type SimpleHandler struct {
+	Path string
+	Handler http.HandlerFunc
+}
+
+func (s *SimpleHandler) Register() {
+	http.HandleFunc(s.Path, s.Handler)
+}
+
+
+func Web(emoter Emoter, handlers []SimpleHandler) {
 
 	// go eventGenerator()
 
@@ -69,7 +79,9 @@ func Web(emoter Emoter) {
 		emoter.Bored()
 	})	
 
-
+	for _, handler := range handlers {
+		handler.Register()
+	}
 
 	http.Handle("/event", websocket.Handler(EventServer))
 	http.Handle("/", http.FileServer(http.Dir("static")))

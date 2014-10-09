@@ -13,6 +13,14 @@ s.scope;
 	- voice clips 
 */
 
+SynthDef(\reverb, {|out=0,in=0, mix=0.25, room=0.15, damp=0.5, amp=1.0|
+	var signal = In.ar(in,2);
+	ReplaceOut.ar(out,FreeVerb2.ar(signal[0],signal[1], mix, room, damp, amp))
+}).add;
+
+
+
+
 SynthDef(\twin, {
 	|x=0,y=0,xvel=0,yvel=0,out=1,amp=0.01|
 	var sig, base = (x+y+xvel+yvel).sqrt + 200;
@@ -39,10 +47,46 @@ SynthDef(\bbb, {
 		))
 }).add();
 
+//{ CombL.ar(Decay.ar(Dust.ar(1,0.5), 0.2, WhiteNoise.ar), 0.2, 0.2, 3) }.play;
 
+//{ Decay.ar(Dust.ar(1,0.5), 0.2, WhiteNoise.ar) }.play;
+
+SynthDef(\dhydro2, {
+	|out=0,amp=1.0,freq=440.0,density=0.2,decaytime=1.0,attacktime=0.01|
+	var nsize,n = (2..10);
+	nsize = n.size;
+	Out.ar(0,
+		Decay2.ar(
+			Dust.ar(density),
+			attacktime,
+			decaytime,
+			amp * 
+			(
+				n.collect {arg i; 
+					SinOsc.ar( (1.0 - (1.0/(i*i))) * freq )
+				}).sum / nsize
+		)
+	)
+}).add;
+
+~dhydro = Synth(\dhydro2);
+~dhydro.autogui;
+
+
+r = Synth(\reverb, addAction: \addToTail);
+r.autogui;
+//r = Synth(\reverb,[\in,8,\mix,1,\room,1,\damp,0.1])
+//Synth(\singrain,[\out,0]);
+r.set(\mix, 1.0);
+r.set(\room, 0.93);
+r.set(\damp, 0.9);
+
+//r.set(\mix,0.0);
+//r.set(\mix, 1.0);
 
 //s.sync;
 ~twin = Synth(\twin);
+~twin.autogui;
 //~twin.free;
 ~happyb = Buffer.read(s,"goldberg-aria-da-capo.wav");
 ~harshb = Buffer.read(s,"peergynt5.wav");
@@ -55,6 +99,9 @@ SynthDef(\bbb, {
 ~excited = Synth(\bbb,[\b,~excitedb.bufnum]);
 ~sad = Synth(\bbb,[\b,~sadb.bufnum]);
 ~sad.set(\amp,1.0)
+
+~happy.autogui;
+~sad.autogui;
 
 //~bbb.free;
 //-10.0.abs
@@ -177,6 +224,7 @@ d["bored"] = {
 };
 
 ~click = {|freq=10,size=0.2| Out.ar(1,CombN.ar(Decay.ar(Dust.ar(freq,size), 0.01, WhiteNoise.ar), 0.2, 0.2, 3)) }.play;
+~click.autogui;
 //~click.set(\freq,0.5);
 
 ~callemotion = { |emotion|

@@ -7,6 +7,8 @@ import (
 	"github.com/edmontongo/gobot"
 	"github.com/edmontongo/gobot/platforms/sphero"
 	"encoding/json"
+	"net/http"
+	"html"
 )
 
 func collisionMessage(c sphero.Collision) *osc.OscMessage {
@@ -43,9 +45,9 @@ type ColourChange struct {
 
 func sendCollision(client *osc.OscClient, c sphero.Collision) {
 	msg := collisionMessage(c) 
-	fmt.Printf("Sending Collision %v\n", msg)
+	//fmt.Printf("Sending Collision %v\n", msg)
 	strJson,_ := json.Marshal(TypeWrap{TypeName:"Collision", Data:c})
-	fmt.Printf("Sending Collision %v\n", string(strJson))
+	//fmt.Printf("Sending Collision %v\n", string(strJson))
 	SpamChannels(string(strJson))
 	//SpamChannels(fmt.Sprintf("Sending Collision %v\n", msg))
 	client.Send(  msg )
@@ -53,9 +55,9 @@ func sendCollision(client *osc.OscClient, c sphero.Collision) {
 
 func sendLocator(client *osc.OscClient, l sphero.Locator) {
 	msg := locatorMessage(l)
-	fmt.Printf("Sending Locator %v\n", msg)
+	//fmt.Printf("Sending Locator %v\n", msg)
 	strJson,_ := json.Marshal(TypeWrap{TypeName:"Locator", Data:l})
-	fmt.Printf("Sending Locator %v\n", string(strJson))
+	//fmt.Printf("Sending Locator %v\n", string(strJson))
 	SpamChannels(string(strJson))
 	client.Send( msg )
 }
@@ -84,7 +86,14 @@ func (cb OscCB) Cb(emoter * Emoter) {
 
 }
 
+type BotCmd struct {
+	Speed int
+	Angle int
+}
 
+func (b *BotCmd) Roll(d *sphero.SpheroDriver) {
+	d.Roll(uint8(b.Speed), uint16((b.Angle + 360) % 360 ))
+}
 
 func main() {
 	ip := "127.0.0.1"
@@ -93,8 +102,6 @@ func main() {
 
 	emoter := MakeEmoter()
 	emoter.SetAll(MakeOSCCB(client))
-
-	go Web(emoter)
 
 
 	gbot := gobot.NewGobot()
@@ -108,6 +115,111 @@ func main() {
 		SpamChannels(string(strJson))
 		spheroDriver.SetRGB(r, g, b)		
 	}
+
+		
+	botChan := make(chan BotCmd,100)
+
+
+	defaultSpeed := 127
+
+	turnLeft := SimpleHandler{
+		"/bot/turn/left",
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "left!", html.EscapeString(r.URL.Path))
+			botChan <- BotCmd{0,-90}			
+		},
+	}
+	turnRight := SimpleHandler{
+		"/bot/turn/right",
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "right!", html.EscapeString(r.URL.Path))
+			botChan <- BotCmd{0,90}	
+		},
+	}
+	forward := SimpleHandler{
+		"/bot/move/forward",
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "forward!", html.EscapeString(r.URL.Path))
+			botChan <- BotCmd{defaultSpeed,0}				
+		},
+	}
+	moveLeft := SimpleHandler{
+		"/bot/move/left",
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "left!", html.EscapeString(r.URL.Path))
+			botChan <- BotCmd{defaultSpeed,-90}				
+		},
+	}
+	moveRight := SimpleHandler{
+		"/bot/move/right",
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "right!", html.EscapeString(r.URL.Path))
+			botChan <- BotCmd{defaultSpeed,90}				
+		},
+	}
+	moveBack := SimpleHandler{
+		"/bot/move/back",
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "back!", html.EscapeString(r.URL.Path))
+			botChan <- BotCmd{defaultSpeed,270}				
+		},
+	}
+
+
+
+	square := SimpleHandler{
+		"/bot/move/square",
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "square!", html.EscapeString(r.URL.Path))
+			botChan <- BotCmd{defaultSpeed,90}				
+			botChan <- BotCmd{defaultSpeed,90}				
+			botChan <- BotCmd{defaultSpeed,180}				
+			botChan <- BotCmd{defaultSpeed,180}				
+			botChan <- BotCmd{defaultSpeed,270}				
+			botChan <- BotCmd{defaultSpeed,270}				
+			botChan <- BotCmd{defaultSpeed,0}				
+			botChan <- BotCmd{defaultSpeed,0}				
+
+			/*
+			botChan <- BotCmd{0,90}				
+			botChan <- BotCmd{defaultSpeed,0}				
+			botChan <- BotCmd{0,90}				
+			botChan <- BotCmd{defaultSpeed,0}				
+			botChan <- BotCmd{0,90}				
+			botChan <- BotCmd{defaultSpeed,0}				
+			botChan <- BotCmd{0,90}				
+			botChan <- BotCmd{defaultSpeed,0}
+                        */
+		},
+	}
+	pause := SimpleHandler{
+		"/bot/move/pause",
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "pause!", html.EscapeString(r.URL.Path))
+			botChan <- BotCmd{0,0}				
+			botChan <- BotCmd{0,0}				
+			botChan <- BotCmd{0,0}				
+			botChan <- BotCmd{0,0}				
+			botChan <- BotCmd{0,0}				
+		},
+	}
+
+
+
+
+	handlers := []SimpleHandler {
+		turnLeft,
+		turnRight,
+		forward,
+		moveBack,
+		moveLeft,
+		moveRight,
+		square,
+		pause,
+	}
+
+
+	go Web(emoter, handlers)
 
 	collisions := 0
 	locations := 0
@@ -129,10 +241,19 @@ func main() {
 		})
 
 
-		gobot.Every(time.Second, func() {
-			spheroDriver.Roll(uint8(gobot.Rand(128)), uint16(gobot.Rand(360)))
-			//fmt.Printf("Collisions: %v\n", collisions)
-
+		incd := 0
+		gobot.Every(250 * time.Millisecond, func() {
+			select {
+			case cmd := <- botChan:
+				fmt.Printf("\n\nGot a command %v\n\n", cmd)
+				cmd.Roll(spheroDriver)
+			default:	
+				incd = incd + 1
+				if (incd % 4 == 0) {
+					fmt.Printf("\n\nMoving randomly\n\n")
+					spheroDriver.Roll(uint8(gobot.Rand(128)), uint16(gobot.Rand(360)))
+				}
+			}
 		})
 		gobot.Every(time.Second, func() {
 			if (collisions < 1 && locations < 1) {

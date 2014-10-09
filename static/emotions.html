@@ -17,14 +17,44 @@
 <button onclick="emotion('bored')">Bored</button><br/>
 <button onclick="emotion('sad')">Sad</button><br/>
 
+<button onclick="bot('turn','left')">Turn Left</button><br/>
+<button onclick="bot('turn','right')">Turn Right</button><br/>
+<button onclick="bot('move','forward')">Move Forward</button><br/>
+<button onclick="bot('move','back')">Move back</button><br/>
+<button onclick="bot('move','left')">Move Left</button><br/>
+<button onclick="bot('move','right')">Move Right</button><br/>
+<button onclick="bot('move','square')">Square Macro</button><br/>
+<button onclick="bot('move','pause')">Pause</button><br/>
+
+
+
 <script>
+var keys = {
+    37: function() { bot('move','left'); },
+    38: function() { bot('move','forward'); },
+    39: function() { bot('move','right'); },
+    40: function() { bot('move','back'); },
+};
+document.onkeyup = function(event) {
+    var code = event.keyCode;
+    if (keys[code]) {
+        keys[code]();
+    }
+}
 
 function emotion(msg) {
         console.log(msg);
 	var xhr = new XMLHttpRequest();
-	xhr.open("GET","http://"+window.location.host+"/emotion/"+msg, true); // don't need a response
+	xhr.open("PUT","http://"+window.location.host+"/emotion/"+msg, true); // don't need a response
 	xhr.send();
 }
+
+function bot(cmd1,cmd2) {
+	var xhr = new XMLHttpRequest();
+	xhr.open("PUT","http://"+window.location.host+"/bot/"+cmd1+"/"+cmd2, true); // don't need a response
+	xhr.send();
+}
+
 
 </script>
 </body>
