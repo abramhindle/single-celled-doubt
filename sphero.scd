@@ -1,6 +1,12 @@
 s.boot;
 s.scope;
 
+~happyb = Buffer.read(s,"goldberg-aria-da-capo.wav");
+~harshb = Buffer.read(s,"peergynt5.wav");
+~excitedb = Buffer.read(s,"peergynt2.wav");
+~sadb = Buffer.read(s,"Gesualdo-O_vos_omnes-stretch.wav");
+
+
 /*
 	ToDo:
 	- [X] set emotion
@@ -69,16 +75,20 @@ SynthDef(\dhydro2, {
 	)
 }).add;
 
+
+/////////////// WAIT //////////////
+
+
 ~dhydro = Synth(\dhydro2);
 ~dhydro.autogui;
-
+~dhydro.set(\decaytime,0.3);
 
 r = Synth(\reverb, addAction: \addToTail);
 r.autogui;
 //r = Synth(\reverb,[\in,8,\mix,1,\room,1,\damp,0.1])
 //Synth(\singrain,[\out,0]);
-r.set(\mix, 1.0);
-r.set(\room, 0.93);
+r.set(\mix, 0.5);
+r.set(\room, 0.5);
 r.set(\damp, 0.9);
 
 //r.set(\mix,0.0);
@@ -88,17 +98,13 @@ r.set(\damp, 0.9);
 ~twin = Synth(\twin);
 ~twin.autogui;
 //~twin.free;
-~happyb = Buffer.read(s,"goldberg-aria-da-capo.wav");
-~harshb = Buffer.read(s,"peergynt5.wav");
-~excitedb = Buffer.read(s,"peergynt2.wav");
-~sadb = Buffer.read(s,"Gesualdo-O_vos_omnes-stretch.wav");
 
 //s.sync;
 ~happy = Synth(\bbb,[\b,~happyb.bufnum]);
 ~harsh = Synth(\bbb,[\b,~harshb.bufnum]);
 ~excited = Synth(\bbb,[\b,~excitedb.bufnum]);
 ~sad = Synth(\bbb,[\b,~sadb.bufnum]);
-~sad.set(\amp,1.0)
+~sad.set(\amp,0.1);
 
 ~happy.autogui;
 ~sad.autogui;
@@ -131,7 +137,7 @@ r.set(\damp, 0.9);
 	~excited.set(\xvel, msg[4]);
 	~excited.set(\yvel, msg[5]);
 
-	~dhydro.set(\freq, (msg[5]+1)*(msg[4]+1));
+	//~dhydro.set(\freq, (msg[5]+1)*(msg[4]+1));
 
 	~harsh.set(\x, msg[1]);
 	~harsh.set(\y, msg[2]);
@@ -177,6 +183,48 @@ r.set(\damp, 0.9);
 ~collisionf = ~clistener;
 ~locatorf = ~listener;
 
+m = Dictionary.new;
+m["square"] = {
+	"Square!".postln;
+	~sad.set(\rate,55.0);
+	~sad.set(\amp,0.1);
+	~happy.set(\rate,0.1);
+	~dhydro.set(\freq,122);
+};
+m["star"] = {
+	"star!".postln;
+	~sad.set(\rate,3.0);
+	~happy.set(\rate,55.0);
+	~dhydro.set(\freq,3000);
+};
+m["pause"] = {
+	"pause!".postln;
+};
+m["back"] = {
+	"back!".postln;
+	~dhydro.set(\freq,120);
+	~dhydro.set(\density,1.0);
+};
+m["forward"] = {
+	"forward!".postln;
+	~dhydro.set(\freq,1200);
+	~dhydro.set(\density,3.0);
+};
+m["left"] = {
+	"left!".postln;
+	~dhydro.set(\freq,500);
+
+};
+m["right"] = {
+	"right!".postln;
+
+	~dhydro.set(\freq,800);
+
+};
+
+
+
+
 d = Dictionary.new;
 d["sad"] = {
 	"Sad emotion!".postln;
@@ -218,7 +266,7 @@ d["angry"] = {
 	~sad.set(\amp,0.001);
 	~sad.set(\rate,1.0);
 	~dhydro.set(\freq, 10.0.rand + 80.0);
-	~dhydro.set(\density, 0.5 + 2.0.rand);
+	~dhydro.set(\density, 0.5 + 6.0.rand);
 
 };
 d["bored"] = {
@@ -228,13 +276,17 @@ d["bored"] = {
 	~twin.set(\amp, 0.03);
 	~sad.set(\amp,0.1);
 	~sad.set(\rate,3.0);
+	~happy.set(\rate, 0.21);
+	~harsh.set(\rate, 0.01);
+	~excited.set(\rate,0.51);
+
 	//{|freq=0.5,size=0.2| Out.ar(1,CombN.ar(Decay.ar(Dust.ar(freq,size), 0.01, WhiteNoise.ar), 0.2, 0.2, 3)) }.play;
 	~dhydro.set(\freq, 10.0.rand + 220.0);
 	~dhydro.set(\density, 0.2 + 1.0.rand);
 
 };
 
-~click = {|freq=10,size=0.2| Out.ar(1,CombN.ar(Decay.ar(Dust.ar(freq,size), 0.01, WhiteNoise.ar), 0.2, 0.2, 3)) }.play;
+~click = {|freq=0.4,size=0.2| Out.ar(1,CombN.ar(Decay.ar(Dust.ar(freq,size), 0.01, WhiteNoise.ar), 0.2, 0.2, 3)) }.play;
 ~click.autogui;
 //~click.set(\freq,0.5);
 
@@ -243,6 +295,15 @@ d["bored"] = {
 	d[emotion.asString].postln;
 	d[emotion.asString].();
 };
+
+~callmacro = { |macro|
+	macro.postln;
+	m[macro.asString].postln;
+	m[macro.asString].();
+};
+
+
+
 ~callemotion.("happy");
 ~emotionf = {
 	|msg, time, addr, recvPort| 
@@ -252,13 +313,25 @@ d["bored"] = {
 	"0000000000000".postln;
 };
 
+~macrof = {
+	|msg, time, addr, recvPort| 
+	var key = msg[1];
+	~callmacro.(key);
+};
+
+
 
 ~callemotion.("happy");
+
+/*
+
 ~callemotion.("sad");
 ~callemotion.("angry");
 ~callemotion.("bored");
+~callmacro.("star");
+~callmacro.("square");
 
-
+*/
 
 ~ldc = {|msg, time, addr, recvPort| 
 	~collisionf.(msg,time,addr,recvPort)
@@ -272,10 +345,16 @@ d["bored"] = {
 	~emotionf.(msg,time,addr,recvPort)
 };
 
+~lmacro = {|msg, time, addr, recvPort| 
+	~macrof.(msg,time,addr,recvPort)
+};
+
 
 ~collision = OSCFunc.newMatching(~ldc, '/collision');
 ~locator = OSCFunc.newMatching(~ldl, '/locator');
 ~emotion = OSCFunc.newMatching(~lde, '/emotion');
+~macro = OSCFunc.newMatching(~lmacro, '/macro');
+
 //~emotion.free;
 //~locator.free()
 /*

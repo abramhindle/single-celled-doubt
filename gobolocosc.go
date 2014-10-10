@@ -76,6 +76,13 @@ func emotionMessage(emotion string) *osc.OscMessage {
 	return msg
 }
 
+func macroMessage(macro string) *osc.OscMessage {
+	msg := osc.NewOscMessage("/macro")
+	msg.Append(string(macro))
+	return msg
+}
+
+
 
 func (cb OscCB) Cb(emoter * Emoter) {
 	message := emotionMessage(emoter.Current)
@@ -99,6 +106,7 @@ func main() {
 	ip := "127.0.0.1"
 	port := 57120
 	client := osc.NewOscClient(ip, port)
+
 
 	emoter := MakeEmoter()
 	emoter.SetAll(MakeOSCCB(client))
@@ -140,7 +148,9 @@ func main() {
 		"/bot/move/forward",
 		func(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "forward!", html.EscapeString(r.URL.Path))
-			botChan <- BotCmd{defaultSpeed,0}				
+			botChan <- BotCmd{defaultSpeed,0}
+			message := macroMessage("forward")
+			client.Send(message)			
 		},
 	}
 	moveLeft := SimpleHandler{
@@ -154,14 +164,18 @@ func main() {
 		"/bot/move/right",
 		func(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "right!", html.EscapeString(r.URL.Path))
-			botChan <- BotCmd{defaultSpeed,90}				
+			botChan <- BotCmd{defaultSpeed,90}
+			message := macroMessage("right")
+			client.Send(message)		
 		},
 	}
 	moveBack := SimpleHandler{
 		"/bot/move/back",
 		func(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "back!", html.EscapeString(r.URL.Path))
-			botChan <- BotCmd{defaultSpeed,270}				
+			botChan <- BotCmd{defaultSpeed,270}
+			message := macroMessage("back")
+			client.Send(message)	
 		},
 	}
 
@@ -171,27 +185,40 @@ func main() {
 		"/bot/move/square",
 		func(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "square!", html.EscapeString(r.URL.Path))
-			botChan <- BotCmd{defaultSpeed,90}				
-			botChan <- BotCmd{defaultSpeed,90}				
-			botChan <- BotCmd{defaultSpeed,180}				
-			botChan <- BotCmd{defaultSpeed,180}				
-			botChan <- BotCmd{defaultSpeed,270}				
-			botChan <- BotCmd{defaultSpeed,270}				
-			botChan <- BotCmd{defaultSpeed,0}				
-			botChan <- BotCmd{defaultSpeed,0}				
-
-			/*
-			botChan <- BotCmd{0,90}				
-			botChan <- BotCmd{defaultSpeed,0}				
-			botChan <- BotCmd{0,90}				
-			botChan <- BotCmd{defaultSpeed,0}				
-			botChan <- BotCmd{0,90}				
-			botChan <- BotCmd{defaultSpeed,0}				
-			botChan <- BotCmd{0,90}				
-			botChan <- BotCmd{defaultSpeed,0}
-                        */
+			botChan <- BotCmd{defaultSpeed,90}	 
+			botChan <- BotCmd{defaultSpeed,90}	 
+			botChan <- BotCmd{defaultSpeed,180}	 
+			botChan <- BotCmd{defaultSpeed,180}	 
+			botChan <- BotCmd{defaultSpeed,270}	 
+			botChan <- BotCmd{defaultSpeed,270}	 
+			botChan <- BotCmd{defaultSpeed,0}	 
+			botChan <- BotCmd{defaultSpeed,0}	 
+			message := macroMessage("square")
+			client.Send(message)
 		},
 	}
+	star := SimpleHandler{
+		"/bot/move/star",
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "star!", html.EscapeString(r.URL.Path))
+			botChan <- BotCmd{defaultSpeed,0}	 
+			botChan <- BotCmd{defaultSpeed,180}	 
+			botChan <- BotCmd{defaultSpeed,60}	 
+			botChan <- BotCmd{defaultSpeed,-60}	 
+			botChan <- BotCmd{defaultSpeed,120}	 
+			botChan <- BotCmd{defaultSpeed,-120}	 
+			botChan <- BotCmd{defaultSpeed,180}	 
+			botChan <- BotCmd{defaultSpeed,-180}	 
+			botChan <- BotCmd{defaultSpeed,240}	 
+			botChan <- BotCmd{defaultSpeed,-240}	 
+			botChan <- BotCmd{defaultSpeed,0}	 
+			botChan <- BotCmd{defaultSpeed,180}	 
+			message := macroMessage("star")
+			client.Send(message)
+		},
+	}
+
+
 	pause := SimpleHandler{
 		"/bot/move/pause",
 		func(w http.ResponseWriter, r *http.Request) {
@@ -201,6 +228,9 @@ func main() {
 			botChan <- BotCmd{0,0}				
 			botChan <- BotCmd{0,0}				
 			botChan <- BotCmd{0,0}				
+			message := macroMessage("pause")
+			client.Send(message)
+
 		},
 	}
 
@@ -216,6 +246,7 @@ func main() {
 		moveRight,
 		square,
 		pause,
+		star,
 	}
 
 

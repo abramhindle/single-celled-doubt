@@ -24,16 +24,22 @@
 <button onclick="bot('move','left')">Move Left</button><br/>
 <button onclick="bot('move','right')">Move Right</button><br/>
 <button onclick="bot('move','square')">Square Macro</button><br/>
+<button onclick="bot('move','star')">Star Macro</button><br/>
 <button onclick="bot('move','pause')">Pause</button><br/>
 
 
 
 <script>
 var keys = {
-    37: function() { bot('move','left'); },
-    38: function() { bot('move','forward'); },
-    39: function() { bot('move','right'); },
-    40: function() { bot('move','back'); },
+    32: function() { bot('move','pause');},//space
+    37: function() { bot('move','left'); },//left
+    38: function() { bot('move','forward'); },//up
+    39: function() { bot('move','right'); },//right
+    40: function() { bot('move','back'); },//down
+    65: function() { emotion('angry'); }, //A
+    66: function() { emotion('bored'); }, //B
+    83: function() { emotion('sad'); },//S
+    72: function() { emotion('happy'); },//H
 };
 document.onkeyup = function(event) {
     var code = event.keyCode;

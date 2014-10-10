@@ -57,14 +57,41 @@ function shuffle(o){ //v1.0
     for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
     return o;
 };
+function choose(arr) {
+    return arr[Math.floor(Math.random()*arr.length)];
+};
+
+var ctx;
+
+var globalCompositeOperations = [
+    'source-over',
+    'xor',
+    'lighter',
+    'source-atop'
+];
+
+function switchCompo() {
+    if (Math.random() > 0.7) {
+        var choice = choose(globalCompositeOperations);
+        console.log([choice,ctx.globalCompositeOperation]);
+        ctx.globalCompositeOperation = choice;
+    }
+}
 
 window.onload = function() {
     var canvas = document.getElementById('canvas');
-    var ctx = canvas.getContext('2d');
+    ctx = canvas.getContext('2d');
     var W = canvas.width  = window.innerWidth-1;
     var H = canvas.height = window.innerHeight-1;
 
+    var collisions = 0.0;
 
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalCompositeOperation = 'xor';
+    //ctx.globalCompositeOperation = 'destination-over';
+    //ctx.globalCompositeOperation = 'lighter';
+    //ctx.globalCompositeOperation = 'source-in';
+    //ctx.globalCompositeOperation = 'destination-atop';
 
     var wsSocket = new WebSocket("ws://"+window.location.host+"/event",
                                  "event");
@@ -72,15 +99,16 @@ window.onload = function() {
     wsSocket.onopen = function (event) { };
     wsSocket.onmessage = function (event) {
         console.log(event.data);
+        if (Math.random() > 0.9) {
+            ctx.font="10px Georgia";
+            ctx.fillText(event.data,Math.random() * W,Math.random() * H);
+        }
         var obj = JSON.parse(event.data);
         handleMessage(obj);
     };
 
 
 
-    function choose(arr) {
-        return arr[Math.floor(Math.random()*arr.length)];
-    };
     function changeFace(emotion) {
         if (!emotion) {
             console.log("emotion");
@@ -93,7 +121,9 @@ window.onload = function() {
         //var obj = document.getElementById("feelings");
         var obj = document.getElementById("body");
         obj.style.color = faceColor[emotion];
-        fade(0.5, faceColor[emotion]);
+        fade(0.7, faceColor[emotion]);
+        switchCompo();
+        //ctx.globalCompositeOperation = choose(globalCompositeOperation);
         //obj.innerHTML = ourFace;
     };
 
@@ -209,7 +239,7 @@ window.onload = function() {
             var doce = document.getElementById("body");
             var color = "rgb("+obj.Data.R+","+obj.Data.G+","+obj.Data.B+")";            
             doce.style.color = color;
-            fade(0.3, color);
+            //fade(0.3, color);
 
         }
         if (obj.TypeName === "Locator") {
@@ -257,7 +287,7 @@ window.onload = function() {
                 "colour":"rgba(255,0,0,0.1)"
             };
             emitDot(dot);
-
+            collisions+=1.0;
         }
         if (obj.TypeName === "Emotion") {
             lastEmotion = obj.Data
