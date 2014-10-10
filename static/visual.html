@@ -233,6 +233,21 @@ window.onload = function() {
     function sqr(x) {
         return x*x;
     }
+
+    function collisionFreakout() {
+        console.log("Collision Freakout");
+        ctx.save();
+        ctx.globalCompositeOperation = 'xor';
+        ctx.globalAlpha = 1.0;
+        ctx.fillStyle = "#000000"//ffffff"
+        ctx.fillRect(0, 0, W/3,H);
+        ctx.fillRect(2*W/3, 0, W/3,H);
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = "#FF0000"//ffffff"
+        ctx.fillRect(W/3, 0, W/3,H);
+        ctx.restore();        
+    }
+
     handleMessage = function(obj) {
         if (obj.TypeName === "Colour") {
             //var doce = document.getElementById("feelings");
@@ -288,6 +303,10 @@ window.onload = function() {
             };
             emitDot(dot);
             collisions+=1.0;
+            if (collisions > 10.0) {
+                collisionFreakout();
+            }
+
         }
         if (obj.TypeName === "Emotion") {
             lastEmotion = obj.Data
@@ -297,6 +316,8 @@ window.onload = function() {
     };
     changeFace(lastEmotion);
     setInterval(randit, 1000/30);
+    setInterval(function() { collisions *= 0.99 }, 100);
+
 };
 </script>
 </body>
